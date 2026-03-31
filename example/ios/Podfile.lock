@@ -1,0 +1,39 @@
+PODS:
+  - BDASignalSDK (1.0.6)
+  - bytedance (0.0.1):
+    - BDASignalSDK
+    - Flutter
+    - Protobuf
+  - Flutter (1.0.0)
+  - integration_test (0.0.1):
+    - Flutter
+  - Protobuf (3.29.6)
+
+DEPENDENCIES:
+  - bytedance (from `.symlinks/plugins/bytedance/ios`)
+  - Flutter (from `Flutter`)
+  - integration_test (from `.symlinks/plugins/integration_test/ios`)
+
+SPEC REPOS:
+  trunk:
+    - BDASignalSDK
+    - Protobuf
+
+EXTERNAL SOURCES:
+  bytedance:
+    :path: ".symlinks/plugins/bytedance/ios"
+  Flutter:
+    :path: Flutter
+  integration_test:
+    :path: ".symlinks/plugins/integration_test/ios"
+
+SPEC CHECKSUMS:
+  BDASignalSDK: 8bb707e922e9fef1718e66ba3c36d9975d665e09
+  bytedance: 8a5b8ec1f0cb609ee34d0ca37fdba067902bf6ce
+  Flutter: cabc95a1d2626b1b06e7179b784ebcf0c0cde467
+  integration_test: 4a889634ef21a45d28d50d622cf412dc6d9f586e
+  Protobuf: 8d5596f7468be5400861a6bbfb2dfe9d0d1cde34
+
+PODFILE CHECKSUM: 3c63482e143d1b91d2d2560aee9fb04ecc74ac7e
+
+COCOAPODS: 1.16.2
