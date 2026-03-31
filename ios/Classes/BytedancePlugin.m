@@ -51,7 +51,7 @@
     NSString* userId = arguments[@"userId"];
     NSString* nickName = arguments[@"nickName"];
     [BDASignalManager trackEssentialEventWithName:kBDADSignalSDKEventRegister params:@{@"userId": userId, @"nickName": nickName}];
-    NSLog(@"=======> Push SDK init failed, error: ");
+    NSLog(@"=======> 注册事件上报，userId: %@, nickName: %@", userId, nickName);
  
 }
 @end
