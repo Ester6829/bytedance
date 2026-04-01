@@ -7,8 +7,8 @@ buildscript {
         mavenCentral()
     }
 
-    dependencies {
-        classpath("com.android.tools.build:gradle:8.9.1")
+    dependencies { 
+        classpath 'com.android.tools.build:gradle:8.12.0'
     }
 }
 
@@ -16,6 +16,9 @@ rootProject.allprojects {
     repositories {
         google()
         mavenCentral()
+        maven {
+            url 'https://artifact.bytedance.com/repository/Volcengine/'
+        }
     }
 }
 
@@ -36,6 +39,7 @@ android {
     }
 
     dependencies {
+        implementation 'com.bytedance.ads:AppConvert:2.0.4'
         testImplementation("junit:junit:4.13.2")
         testImplementation("org.mockito:mockito-core:5.0.0")
     }
