@@ -11,6 +11,7 @@ import io.flutter.plugin.common.MethodChannel.Result;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.app.Activity;
+import android.provider.Settings;
 
 import com.bytedance.ads.convert.BDConvert;
 import com.bytedance.ads.convert.config.BDConvertConfig;
@@ -47,6 +48,10 @@ public class BytedancePlugin implements FlutterPlugin, MethodCallHandler {
       result.success("Android " + android.os.Build.VERSION.RELEASE);
     } else if (call.method.equals("uploadRegister")) {
       uploadRegister(call, result);
+    } else if (call.method.equals("getIdfv")) {
+      result.success(null);
+    } else if (call.method.equals("getAndroidId")) {
+      getAndroidId(result);
     } else {
       result.notImplemented();
     }
@@ -93,5 +98,19 @@ public class BytedancePlugin implements FlutterPlugin, MethodCallHandler {
         e.printStackTrace();
     }
     ConvertReportHelper.onEventV3("register", customData);
+  }
+
+  private void getAndroidId(Result result) {
+    try {
+      String androidId = Settings.Secure.getString(
+          applicationContext.getContentResolver(),
+          Settings.Secure.ANDROID_ID
+      );
+      android.util.Log.d("BytedancePlugin", "Android ID: " + androidId);
+      result.success(androidId);
+    } catch (Exception e) {
+      android.util.Log.e("BytedancePlugin", "Failed to get Android ID", e);
+      result.success(null);
+    }
   }
 }

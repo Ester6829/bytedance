@@ -30,4 +30,12 @@ abstract class BytedancePlatform extends PlatformInterface {
   void uploadRegister(Map<String, dynamic> arguments) {
     throw UnimplementedError('platformVersion() has not been implemented.');
   }
+
+  Future<String?> getIdfv() {
+    throw UnimplementedError('getIdfv() has not been implemented.');
+  }
+
+  Future<String?> getAndroidId() {
+    throw UnimplementedError('getAndroidId() has not been implemented.');
+  }
 }

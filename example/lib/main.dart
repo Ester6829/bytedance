@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'dart:async';
 
@@ -34,6 +36,15 @@ class _MyAppState extends State<MyApp> {
       platformVersion =
           await _bytedancePlugin.getPlatformVersion() ?? 'Unknown platform version';
       _bytedancePlugin.uploadRegister({"userId": "123456", "nickName": "test"});
+      if (Platform.isIOS) {
+        _bytedancePlugin.getIdfv().then((value) {
+          print("idfv: $value");
+        });
+      } else {
+        _bytedancePlugin.getAndroidId().then((value) {
+          print("androidId: $value");
+        });
+      }
     } on PlatformException {
       platformVersion = 'Failed to get platform version.';
     }

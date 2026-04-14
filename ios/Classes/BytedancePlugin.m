@@ -17,6 +17,10 @@
     result([@"iOS " stringByAppendingString:[[UIDevice currentDevice] systemVersion]]);
   } else if ([@"uploadRegister" isEqualToString:call.method]) {
         [self uploadRegister:call result:result];
+  } else if ([@"getIdfv" isEqualToString:call.method]) {
+        [self getIdfv:result];
+  } else if ([@"getAndroidId" isEqualToString:call.method]) {
+        result(nil);
     } else {
     result(FlutterMethodNotImplemented);
   }
@@ -45,14 +49,22 @@
     return YES;
 }
 
-// 上报注册事件 
+// 上报注册事件
 - (void)uploadRegister:(FlutterMethodCall *)call result:(FlutterResult)result {
     NSDictionary *arguments = call.arguments;
     NSString* userId = arguments[@"userId"];
     NSString* nickName = arguments[@"nickName"];
     [BDASignalManager trackEssentialEventWithName:kBDADSignalSDKEventRegister params:@{@"userId": userId, @"nickName": nickName}];
     NSLog(@"=======> 注册事件上报，userId: %@, nickName: %@", userId, nickName);
- 
+
+}
+
+// 获取 IDFV
+- (void)getIdfv:(FlutterResult)result {
+    NSUUID *idfv = [[UIDevice currentDevice] identifierForVendor];
+    NSString *idfvString = [idfv UUIDString];
+    NSLog(@"=======> IDFV: %@", idfvString);
+    result(idfvString);
 }
 @end
   

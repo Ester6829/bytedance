@@ -19,4 +19,16 @@ class MethodChannelBytedance extends BytedancePlatform {
   void uploadRegister(Map<String, dynamic> arguments) {
     methodChannel.invokeMethod('uploadRegister', arguments);
   }
+
+  @override
+  Future<String?> getIdfv() async {
+    final idfv = await methodChannel.invokeMethod<String>('getIdfv');
+    return idfv;
+  }
+
+  @override
+  Future<String?> getAndroidId() async {
+    final androidId = await methodChannel.invokeMethod<String>('getAndroidId');
+    return androidId;
+  }
 }
