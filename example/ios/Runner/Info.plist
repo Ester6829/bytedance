@@ -49,7 +49,7 @@
 	<!-- 巨量营销 SDK 配置 -->
 	<key>BDASignalSDKAppID</key>
 	<string>1911470</string>
-。
+
 	<!-- 网络权限配置 -->
 	<key>NSAppTransportSecurity</key>
 	<dict>
