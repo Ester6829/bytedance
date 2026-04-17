@@ -25,6 +25,11 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
+        <!-- 巨量营销 SDK AppID 配置 -->
+        <meta-data
+            android:name="BDConvertSDKAppID"
+            android:value="1911470" />
+
         <!-- Don't delete the meta-data below.
              This is used by the Flutter tool to generate GeneratedPluginRegistrant.java -->
         <meta-data
