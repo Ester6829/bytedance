@@ -11,15 +11,12 @@ import io.flutter.plugin.common.MethodChannel.MethodCallHandler;
 import io.flutter.plugin.common.MethodChannel.Result;
 
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.app.Activity;
 import android.provider.Settings;
 
 import com.bytedance.ads.convert.BDConvert;
 import com.bytedance.ads.convert.config.BDConvertConfig;
 import com.bytedance.ads.convert.event.ConvertReportHelper;
-import com.bytedance.ads.convert.listener.AttributionListener;
-import com.bytedance.ads.convert.model.AttributionData;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -28,16 +25,15 @@ import java.util.HashMap;
 import java.util.Map;
 
 
-/** BytedancePlugin */
 public class BytedancePlugin implements FlutterPlugin, MethodCallHandler, ActivityAware {
   private MethodChannel channel;
   private Context applicationContext;
   private Activity mainActivity;
   private boolean isInitialized = false;
+  private String currentUserId = null;
 
   final String USER_STATE_SP = "USER_STATE_SP";
   final String ALREADY_AGREE = "ALREADY_AGREE";
-  private static final String TAG = "BytedancePlugin";
 
   @Override
   public void onAttachedToEngine(@NonNull FlutterPluginBinding flutterPluginBinding) {
@@ -135,17 +131,14 @@ public class BytedancePlugin implements FlutterPlugin, MethodCallHandler, Activi
         isInitialized = true;
 
         if (userId != null && !userId.isEmpty()) {
-          BDConvert.INSTANCE.setUserId(userId);
+          currentUserId = userId;
         }
 
-        android.util.Log.d(TAG, "SDK initialized successfully");
         result.success(true);
       } else {
-        android.util.Log.e(TAG, "Activity is null, cannot initialize SDK");
         result.success(false);
       }
     } catch (Exception e) {
-      android.util.Log.e(TAG, "Failed to initialize SDK", e);
       result.error("INIT_ERROR", e.getMessage(), null);
     }
   }
@@ -156,11 +149,9 @@ public class BytedancePlugin implements FlutterPlugin, MethodCallHandler, Activi
       if (enable != null) {
         BDConvertConfig config = new BDConvertConfig();
         config.setEnableLog(enable);
-        android.util.Log.d(TAG, "Debug mode set to: " + enable);
       }
       result.success(true);
     } catch (Exception e) {
-      android.util.Log.e(TAG, "Failed to set debug mode", e);
       result.error("DEBUG_MODE_ERROR", e.getMessage(), null);
     }
   }
@@ -169,23 +160,19 @@ public class BytedancePlugin implements FlutterPlugin, MethodCallHandler, Activi
     try {
       String userId = call.argument("userId");
       if (userId != null) {
-        BDConvert.INSTANCE.setUserId(userId);
-        android.util.Log.d(TAG, "User ID set: " + userId);
+        currentUserId = userId;
       }
       result.success(true);
     } catch (Exception e) {
-      android.util.Log.e(TAG, "Failed to set user ID", e);
       result.error("SET_USER_ID_ERROR", e.getMessage(), null);
     }
   }
 
   private void clearUserId(Result result) {
     try {
-      BDConvert.INSTANCE.setUserId(null);
-      android.util.Log.d(TAG, "User ID cleared");
+      currentUserId = null;
       result.success(true);
     } catch (Exception e) {
-      android.util.Log.e(TAG, "Failed to clear user ID", e);
       result.error("CLEAR_USER_ID_ERROR", e.getMessage(), null);
     }
   }
@@ -201,14 +188,11 @@ public class BytedancePlugin implements FlutterPlugin, MethodCallHandler, Activi
       if (nickName != null) customData.put("nickName", nickName);
       if (registerType != null) customData.put("registerType", registerType);
 
-      android.util.Log.d(TAG, "Upload register event: " + customData.toString());
       ConvertReportHelper.onEventV3("register", customData);
       result.success(true);
     } catch (JSONException e) {
-      android.util.Log.e(TAG, "JSON error in uploadRegister", e);
       result.error("JSON_ERROR", e.getMessage(), null);
     } catch (Exception e) {
-      android.util.Log.e(TAG, "Failed to upload register event", e);
       result.error("UPLOAD_ERROR", e.getMessage(), null);
     }
   }
@@ -222,14 +206,11 @@ public class BytedancePlugin implements FlutterPlugin, MethodCallHandler, Activi
       if (userId != null) customData.put("userId", userId);
       if (method != null) customData.put("method", method);
 
-      android.util.Log.d(TAG, "Upload login event: " + customData.toString());
       ConvertReportHelper.onEventV3("login", customData);
       result.success(true);
     } catch (JSONException e) {
-      android.util.Log.e(TAG, "JSON error in uploadLogin", e);
       result.error("JSON_ERROR", e.getMessage(), null);
     } catch (Exception e) {
-      android.util.Log.e(TAG, "Failed to upload login event", e);
       result.error("UPLOAD_ERROR", e.getMessage(), null);
     }
   }
@@ -251,14 +232,11 @@ public class BytedancePlugin implements FlutterPlugin, MethodCallHandler, Activi
       if (productName != null) customData.put("productName", productName);
       if (quantity != null) customData.put("quantity", quantity);
 
-      android.util.Log.d(TAG, "Upload purchase event: " + customData.toString());
       ConvertReportHelper.onEventV3("purchase", customData);
       result.success(true);
     } catch (JSONException e) {
-      android.util.Log.e(TAG, "JSON error in uploadPurchase", e);
       result.error("JSON_ERROR", e.getMessage(), null);
     } catch (Exception e) {
-      android.util.Log.e(TAG, "Failed to upload purchase event", e);
       result.error("UPLOAD_ERROR", e.getMessage(), null);
     }
   }
@@ -275,14 +253,11 @@ public class BytedancePlugin implements FlutterPlugin, MethodCallHandler, Activi
         }
       }
 
-      android.util.Log.d(TAG, "Upload custom event: " + eventName + ", data: " + customData.toString());
       ConvertReportHelper.onEventV3(eventName, customData);
       result.success(true);
     } catch (JSONException e) {
-      android.util.Log.e(TAG, "JSON error in uploadCustomEvent", e);
       result.error("JSON_ERROR", e.getMessage(), null);
     } catch (Exception e) {
-      android.util.Log.e(TAG, "Failed to upload custom event", e);
       result.error("UPLOAD_ERROR", e.getMessage(), null);
     }
   }
@@ -297,54 +272,24 @@ public class BytedancePlugin implements FlutterPlugin, MethodCallHandler, Activi
           applicationContext.getContentResolver(),
           Settings.Secure.ANDROID_ID
       );
-      android.util.Log.d(TAG, "Android ID: " + androidId);
       result.success(androidId);
     } catch (Exception e) {
-      android.util.Log.e(TAG, "Failed to get Android ID", e);
       result.success(null);
     }
   }
 
-  private void getAttributionData(final Result result) {
+  private void getAttributionData(Result result) {
     try {
-      BDConvert.INSTANCE.requestAttribution(new AttributionListener() {
-        @Override
-        public void onSuccess(AttributionData attributionData) {
-          Map<String, Object> data = new HashMap<>();
-          if (attributionData != null) {
-            data.put("attributionId", attributionData.getAttributionId());
-            data.put("campaignId", attributionData.getCampaignId());
-            data.put("adgroupId", attributionData.getAdgroupId());
-            data.put("creativeId", attributionData.getCreativeId());
-            data.put("channel", attributionData.getChannel());
-            data.put("callbackParam", attributionData.getCallbackParam());
-            data.put("clickTime", attributionData.getClickTime());
-            data.put("installTime", attributionData.getInstallTime());
-            data.put("isDeepLink", attributionData.isDeepLink());
-            data.put("deepLinkUrl", attributionData.getDeepLinkUrl());
-          }
-          data.put("androidId", getAndroidIdSync());
-          data.put("platform", "Android");
-          data.put("osVersion", android.os.Build.VERSION.RELEASE);
+      Map<String, Object> data = new HashMap<>();
+      data.put("androidId", getAndroidIdSync());
+      data.put("platform", "Android");
+      data.put("osVersion", android.os.Build.VERSION.RELEASE);
+      if (currentUserId != null) {
+        data.put("userId", currentUserId);
+      }
 
-          android.util.Log.d(TAG, "Attribution data: " + data.toString());
-          result.success(data);
-        }
-
-        @Override
-        public void onError(int errorCode, String errorMessage) {
-          android.util.Log.e(TAG, "Attribution error: " + errorCode + " - " + errorMessage);
-          Map<String, Object> fallbackData = new HashMap<>();
-          fallbackData.put("errorCode", errorCode);
-          fallbackData.put("errorMessage", errorMessage);
-          fallbackData.put("androidId", getAndroidIdSync());
-          fallbackData.put("platform", "Android");
-          fallbackData.put("osVersion", android.os.Build.VERSION.RELEASE);
-          result.success(fallbackData);
-        }
-      });
+      result.success(data);
     } catch (Exception e) {
-      android.util.Log.e(TAG, "Failed to get attribution data", e);
       Map<String, Object> errorData = new HashMap<>();
       errorData.put("error", e.getMessage());
       errorData.put("androidId", getAndroidIdSync());
