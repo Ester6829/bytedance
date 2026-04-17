@@ -28,7 +28,7 @@ abstract class BytedancePlatform extends PlatformInterface {
   }
 
   void uploadRegister(Map<String, dynamic> arguments) {
-    throw UnimplementedError('platformVersion() has not been implemented.');
+    throw UnimplementedError('uploadRegister() has not been implemented.');
   }
 
   Future<String?> getIdfv() {
@@ -37,5 +37,45 @@ abstract class BytedancePlatform extends PlatformInterface {
 
   Future<String?> getAndroidId() {
     throw UnimplementedError('getAndroidId() has not been implemented.');
+  }
+
+  void uploadLogin(Map<String, dynamic> arguments) {
+    throw UnimplementedError('uploadLogin() has not been implemented.');
+  }
+
+  void uploadPurchase(Map<String, dynamic> arguments) {
+    throw UnimplementedError('uploadPurchase() has not been implemented.');
+  }
+
+  void uploadCustomEvent(Map<String, dynamic> arguments) {
+    throw UnimplementedError('uploadCustomEvent() has not been implemented.');
+  }
+
+  void setUserId(Map<String, dynamic> arguments) {
+    throw UnimplementedError('setUserId() has not been implemented.');
+  }
+
+  void clearUserId() {
+    throw UnimplementedError('clearUserId() has not been implemented.');
+  }
+
+  Future<String?> getIdfa() {
+    throw UnimplementedError('getIdfa() has not been implemented.');
+  }
+
+  void initSdk(Map<String, dynamic> arguments) {
+    throw UnimplementedError('initSdk() has not been implemented.');
+  }
+
+  void trackEvent(Map<String, dynamic> arguments) {
+    throw UnimplementedError('trackEvent() has not been implemented.');
+  }
+
+  void setDebugMode(Map<String, dynamic> arguments) {
+    throw UnimplementedError('setDebugMode() has not been implemented.');
+  }
+
+  Future<Map<String, dynamic>?> getAttributionData() {
+    throw UnimplementedError('getAttributionData() has not been implemented.');
   }
 }

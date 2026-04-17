@@ -1,4 +1,4 @@
-package com.example.bytedance_example;
+package io.dcloud.naclub;
 
 import io.flutter.embedding.android.FlutterActivity;
 

@@ -31,4 +31,56 @@ class MethodChannelBytedance extends BytedancePlatform {
     final androidId = await methodChannel.invokeMethod<String>('getAndroidId');
     return androidId;
   }
+
+  @override
+  void uploadLogin(Map<String, dynamic> arguments) {
+    methodChannel.invokeMethod('uploadLogin', arguments);
+  }
+
+  @override
+  void uploadPurchase(Map<String, dynamic> arguments) {
+    methodChannel.invokeMethod('uploadPurchase', arguments);
+  }
+
+  @override
+  void uploadCustomEvent(Map<String, dynamic> arguments) {
+    methodChannel.invokeMethod('uploadCustomEvent', arguments);
+  }
+
+  @override
+  void setUserId(Map<String, dynamic> arguments) {
+    methodChannel.invokeMethod('setUserId', arguments);
+  }
+
+  @override
+  void clearUserId() {
+    methodChannel.invokeMethod('clearUserId');
+  }
+
+  @override
+  Future<String?> getIdfa() async {
+    final idfa = await methodChannel.invokeMethod<String>('getIdfa');
+    return idfa;
+  }
+
+  @override
+  void initSdk(Map<String, dynamic> arguments) {
+    methodChannel.invokeMethod('initSdk', arguments);
+  }
+
+  @override
+  void trackEvent(Map<String, dynamic> arguments) {
+    methodChannel.invokeMethod('trackEvent', arguments);
+  }
+
+  @override
+  void setDebugMode(Map<String, dynamic> arguments) {
+    methodChannel.invokeMethod('setDebugMode', arguments);
+  }
+
+  @override
+  Future<Map<String, dynamic>?> getAttributionData() async {
+    final data = await methodChannel.invokeMethod<Map<String, dynamic>>('getAttributionData');
+    return data;
+  }
 }

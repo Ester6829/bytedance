@@ -3,6 +3,8 @@ package com.example.bytedance;
 import androidx.annotation.NonNull;
 
 import io.flutter.embedding.engine.plugins.FlutterPlugin;
+import io.flutter.embedding.engine.plugins.activity.ActivityAware;
+import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding;
 import io.flutter.plugin.common.MethodCall;
 import io.flutter.plugin.common.MethodChannel;
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler;
@@ -16,44 +18,102 @@ import android.provider.Settings;
 import com.bytedance.ads.convert.BDConvert;
 import com.bytedance.ads.convert.config.BDConvertConfig;
 import com.bytedance.ads.convert.event.ConvertReportHelper;
+import com.bytedance.ads.convert.listener.AttributionListener;
+import com.bytedance.ads.convert.model.AttributionData;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.HashMap;
+import java.util.Map;
+
 
 /** BytedancePlugin */
-public class BytedancePlugin implements FlutterPlugin, MethodCallHandler {
-  /// The MethodChannel that will the communication between Flutter and native Android
-  ///
-  /// This local reference serves to register the plugin with the Flutter Engine and unregister it
-  /// when the Flutter Engine is detached from the Activity
-  private MethodChannel channel;  
+public class BytedancePlugin implements FlutterPlugin, MethodCallHandler, ActivityAware {
+  private MethodChannel channel;
   private Context applicationContext;
   private Activity mainActivity;
+  private boolean isInitialized = false;
 
   final String USER_STATE_SP = "USER_STATE_SP";
   final String ALREADY_AGREE = "ALREADY_AGREE";
+  private static final String TAG = "BytedancePlugin";
 
   @Override
   public void onAttachedToEngine(@NonNull FlutterPluginBinding flutterPluginBinding) {
     channel = new MethodChannel(flutterPluginBinding.getBinaryMessenger(), "bytedance");
     channel.setMethodCallHandler(this);
     this.applicationContext = flutterPluginBinding.getApplicationContext();
-    initBdConvert();
+  }
+
+  @Override
+  public void onAttachedToActivity(@NonNull ActivityPluginBinding binding) {
+    this.mainActivity = binding.getActivity();
+  }
+
+  @Override
+  public void onDetachedFromActivityForConfigChanges() {
+    this.mainActivity = null;
+  }
+
+  @Override
+  public void onReattachedToActivityForConfigChanges(@NonNull ActivityPluginBinding binding) {
+    this.mainActivity = binding.getActivity();
+  }
+
+  @Override
+  public void onDetachedFromActivity() {
+    this.mainActivity = null;
   }
 
   @Override
   public void onMethodCall(@NonNull MethodCall call, @NonNull Result result) {
-    if (call.method.equals("getPlatformVersion")) {
-      result.success("Android " + android.os.Build.VERSION.RELEASE);
-    } else if (call.method.equals("uploadRegister")) {
-      uploadRegister(call, result);
-    } else if (call.method.equals("getIdfv")) {
-      result.success(null);
-    } else if (call.method.equals("getAndroidId")) {
-      getAndroidId(result);
-    } else {
-      result.notImplemented();
+    switch (call.method) {
+      case "getPlatformVersion":
+        result.success("Android " + android.os.Build.VERSION.RELEASE);
+        break;
+      case "initSdk":
+        initSdk(call, result);
+        break;
+      case "uploadRegister":
+        uploadRegister(call, result);
+        break;
+      case "uploadLogin":
+        uploadLogin(call, result);
+        break;
+      case "uploadPurchase":
+        uploadPurchase(call, result);
+        break;
+      case "uploadCustomEvent":
+        uploadCustomEvent(call, result);
+        break;
+      case "trackEvent":
+        trackEvent(call, result);
+        break;
+      case "setUserId":
+        setUserId(call, result);
+        break;
+      case "clearUserId":
+        clearUserId(result);
+        break;
+      case "getIdfv":
+        result.success(null);
+        break;
+      case "getIdfa":
+        result.success(null);
+        break;
+      case "getAndroidId":
+        getAndroidId(result);
+        break;
+      case "setDebugMode":
+        setDebugMode(call, result);
+        break;
+      case "getAttributionData":
+        getAttributionData(result);
+        break;
+      default:
+        result.notImplemented();
+        break;
     }
   }
 
@@ -62,42 +122,173 @@ public class BytedancePlugin implements FlutterPlugin, MethodCallHandler {
     channel.setMethodCallHandler(null);
   }
 
-
-  //初始化
-  private void initBdConvert() {
+  private void initSdk(MethodCall call, Result result) {
     try {
+      Boolean isDebug = call.argument("isDebug");
+      String userId = call.argument("userId");
+
       BDConvertConfig config = new BDConvertConfig();
-      config.setEnableLog(true);
-      
+      config.setEnableLog(isDebug != null ? isDebug : false);
+
       if (mainActivity != null) {
         BDConvert.INSTANCE.init(applicationContext, config, mainActivity);
-      }  
+        isInitialized = true;
+
+        if (userId != null && !userId.isEmpty()) {
+          BDConvert.INSTANCE.setUserId(userId);
+        }
+
+        android.util.Log.d(TAG, "SDK initialized successfully");
+        result.success(true);
+      } else {
+        android.util.Log.e(TAG, "Activity is null, cannot initialize SDK");
+        result.success(false);
+      }
     } catch (Exception e) {
-      e.printStackTrace();
+      android.util.Log.e(TAG, "Failed to initialize SDK", e);
+      result.error("INIT_ERROR", e.getMessage(), null);
     }
   }
 
+  private void setDebugMode(MethodCall call, Result result) {
+    try {
+      Boolean enable = call.argument("enable");
+      if (enable != null) {
+        BDConvertConfig config = new BDConvertConfig();
+        config.setEnableLog(enable);
+        android.util.Log.d(TAG, "Debug mode set to: " + enable);
+      }
+      result.success(true);
+    } catch (Exception e) {
+      android.util.Log.e(TAG, "Failed to set debug mode", e);
+      result.error("DEBUG_MODE_ERROR", e.getMessage(), null);
+    }
+  }
+
+  private void setUserId(MethodCall call, Result result) {
+    try {
+      String userId = call.argument("userId");
+      if (userId != null) {
+        BDConvert.INSTANCE.setUserId(userId);
+        android.util.Log.d(TAG, "User ID set: " + userId);
+      }
+      result.success(true);
+    } catch (Exception e) {
+      android.util.Log.e(TAG, "Failed to set user ID", e);
+      result.error("SET_USER_ID_ERROR", e.getMessage(), null);
+    }
+  }
+
+  private void clearUserId(Result result) {
+    try {
+      BDConvert.INSTANCE.setUserId(null);
+      android.util.Log.d(TAG, "User ID cleared");
+      result.success(true);
+    } catch (Exception e) {
+      android.util.Log.e(TAG, "Failed to clear user ID", e);
+      result.error("CLEAR_USER_ID_ERROR", e.getMessage(), null);
+    }
+  }
 
   private void uploadRegister(MethodCall call, Result result) {
-    // 可以传递更多详细信息
-    String registerType = call.argument("registerType");
-    String userId = call.argument("userId");
-    String nickName = call.argument("nickName");
-
-    JSONObject customData = new JSONObject();
     try {
-        customData.put("userId", userId);
-        customData.put("nickName", nickName); 
+      String userId = call.argument("userId");
+      String nickName = call.argument("nickName");
+      String registerType = call.argument("registerType");
 
-         // 详细打印数据
-        android.util.Log.d("BytedancePlugin", "Register Type: " + registerType);
-        android.util.Log.d("BytedancePlugin", "Custom Data: " + customData.toString());
-        android.util.Log.d("BytedancePlugin", "Data contains " + customData.length() + " fields");
-  
+      JSONObject customData = new JSONObject();
+      if (userId != null) customData.put("userId", userId);
+      if (nickName != null) customData.put("nickName", nickName);
+      if (registerType != null) customData.put("registerType", registerType);
+
+      android.util.Log.d(TAG, "Upload register event: " + customData.toString());
+      ConvertReportHelper.onEventV3("register", customData);
+      result.success(true);
     } catch (JSONException e) {
-        e.printStackTrace();
+      android.util.Log.e(TAG, "JSON error in uploadRegister", e);
+      result.error("JSON_ERROR", e.getMessage(), null);
+    } catch (Exception e) {
+      android.util.Log.e(TAG, "Failed to upload register event", e);
+      result.error("UPLOAD_ERROR", e.getMessage(), null);
     }
-    ConvertReportHelper.onEventV3("register", customData);
+  }
+
+  private void uploadLogin(MethodCall call, Result result) {
+    try {
+      String userId = call.argument("userId");
+      String method = call.argument("method");
+
+      JSONObject customData = new JSONObject();
+      if (userId != null) customData.put("userId", userId);
+      if (method != null) customData.put("method", method);
+
+      android.util.Log.d(TAG, "Upload login event: " + customData.toString());
+      ConvertReportHelper.onEventV3("login", customData);
+      result.success(true);
+    } catch (JSONException e) {
+      android.util.Log.e(TAG, "JSON error in uploadLogin", e);
+      result.error("JSON_ERROR", e.getMessage(), null);
+    } catch (Exception e) {
+      android.util.Log.e(TAG, "Failed to upload login event", e);
+      result.error("UPLOAD_ERROR", e.getMessage(), null);
+    }
+  }
+
+  private void uploadPurchase(MethodCall call, Result result) {
+    try {
+      String orderId = call.argument("orderId");
+      Double amount = call.argument("amount");
+      String currency = call.argument("currency");
+      String productId = call.argument("productId");
+      String productName = call.argument("productName");
+      Integer quantity = call.argument("quantity");
+
+      JSONObject customData = new JSONObject();
+      if (orderId != null) customData.put("orderId", orderId);
+      if (amount != null) customData.put("amount", amount);
+      if (currency != null) customData.put("currency", currency);
+      if (productId != null) customData.put("productId", productId);
+      if (productName != null) customData.put("productName", productName);
+      if (quantity != null) customData.put("quantity", quantity);
+
+      android.util.Log.d(TAG, "Upload purchase event: " + customData.toString());
+      ConvertReportHelper.onEventV3("purchase", customData);
+      result.success(true);
+    } catch (JSONException e) {
+      android.util.Log.e(TAG, "JSON error in uploadPurchase", e);
+      result.error("JSON_ERROR", e.getMessage(), null);
+    } catch (Exception e) {
+      android.util.Log.e(TAG, "Failed to upload purchase event", e);
+      result.error("UPLOAD_ERROR", e.getMessage(), null);
+    }
+  }
+
+  private void uploadCustomEvent(MethodCall call, Result result) {
+    try {
+      String eventName = call.argument("eventName");
+      Map<String, Object> params = call.argument("params");
+
+      JSONObject customData = new JSONObject();
+      if (params != null) {
+        for (Map.Entry<String, Object> entry : params.entrySet()) {
+          customData.put(entry.getKey(), entry.getValue());
+        }
+      }
+
+      android.util.Log.d(TAG, "Upload custom event: " + eventName + ", data: " + customData.toString());
+      ConvertReportHelper.onEventV3(eventName, customData);
+      result.success(true);
+    } catch (JSONException e) {
+      android.util.Log.e(TAG, "JSON error in uploadCustomEvent", e);
+      result.error("JSON_ERROR", e.getMessage(), null);
+    } catch (Exception e) {
+      android.util.Log.e(TAG, "Failed to upload custom event", e);
+      result.error("UPLOAD_ERROR", e.getMessage(), null);
+    }
+  }
+
+  private void trackEvent(MethodCall call, Result result) {
+    uploadCustomEvent(call, result);
   }
 
   private void getAndroidId(Result result) {
@@ -106,11 +297,71 @@ public class BytedancePlugin implements FlutterPlugin, MethodCallHandler {
           applicationContext.getContentResolver(),
           Settings.Secure.ANDROID_ID
       );
-      android.util.Log.d("BytedancePlugin", "Android ID: " + androidId);
+      android.util.Log.d(TAG, "Android ID: " + androidId);
       result.success(androidId);
     } catch (Exception e) {
-      android.util.Log.e("BytedancePlugin", "Failed to get Android ID", e);
+      android.util.Log.e(TAG, "Failed to get Android ID", e);
       result.success(null);
+    }
+  }
+
+  private void getAttributionData(final Result result) {
+    try {
+      BDConvert.INSTANCE.requestAttribution(new AttributionListener() {
+        @Override
+        public void onSuccess(AttributionData attributionData) {
+          Map<String, Object> data = new HashMap<>();
+          if (attributionData != null) {
+            data.put("attributionId", attributionData.getAttributionId());
+            data.put("campaignId", attributionData.getCampaignId());
+            data.put("adgroupId", attributionData.getAdgroupId());
+            data.put("creativeId", attributionData.getCreativeId());
+            data.put("channel", attributionData.getChannel());
+            data.put("callbackParam", attributionData.getCallbackParam());
+            data.put("clickTime", attributionData.getClickTime());
+            data.put("installTime", attributionData.getInstallTime());
+            data.put("isDeepLink", attributionData.isDeepLink());
+            data.put("deepLinkUrl", attributionData.getDeepLinkUrl());
+          }
+          data.put("androidId", getAndroidIdSync());
+          data.put("platform", "Android");
+          data.put("osVersion", android.os.Build.VERSION.RELEASE);
+
+          android.util.Log.d(TAG, "Attribution data: " + data.toString());
+          result.success(data);
+        }
+
+        @Override
+        public void onError(int errorCode, String errorMessage) {
+          android.util.Log.e(TAG, "Attribution error: " + errorCode + " - " + errorMessage);
+          Map<String, Object> fallbackData = new HashMap<>();
+          fallbackData.put("errorCode", errorCode);
+          fallbackData.put("errorMessage", errorMessage);
+          fallbackData.put("androidId", getAndroidIdSync());
+          fallbackData.put("platform", "Android");
+          fallbackData.put("osVersion", android.os.Build.VERSION.RELEASE);
+          result.success(fallbackData);
+        }
+      });
+    } catch (Exception e) {
+      android.util.Log.e(TAG, "Failed to get attribution data", e);
+      Map<String, Object> errorData = new HashMap<>();
+      errorData.put("error", e.getMessage());
+      errorData.put("androidId", getAndroidIdSync());
+      errorData.put("platform", "Android");
+      errorData.put("osVersion", android.os.Build.VERSION.RELEASE);
+      result.success(errorData);
+    }
+  }
+
+  private String getAndroidIdSync() {
+    try {
+      return Settings.Secure.getString(
+          applicationContext.getContentResolver(),
+          Settings.Secure.ANDROID_ID
+      );
+    } catch (Exception e) {
+      return null;
     }
   }
 }
