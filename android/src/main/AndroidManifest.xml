@@ -1,11 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
   package="com.example.bytedance">
 
-    <application>
-        <!-- 巨量营销 SDK AppID 配置 -->
-        <meta-data
-            android:name="BDConvertSDKAppID"
-            android:value="1911470" />
+    <application> 
     </application>
 
 </manifest>
