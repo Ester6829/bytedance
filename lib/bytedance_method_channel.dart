@@ -80,7 +80,49 @@ class MethodChannelBytedance extends BytedancePlatform {
 
   @override
   Future<Map<String, dynamic>?> getAttributionData() async {
-    final data = await methodChannel.invokeMethod<Map<String, dynamic>>('getAttributionData');
-    return data;
+    final data = await methodChannel.invokeMethod<Map<Object?, Object?>>('getAttributionData');
+    return data?.cast<String, dynamic>();
+  }
+
+  @override
+  void uploadActiveRegister(Map<String, dynamic> arguments) {
+    methodChannel.invokeMethod('uploadActiveRegister', arguments);
+  }
+
+  @override
+  void requestAttribution() {
+    methodChannel.invokeMethod('requestAttribution');
+  }
+
+  @override
+  Future<Map<String, dynamic>?> getCachedAttributionData() async {
+    final data = await methodChannel.invokeMethod<Map<Object?, Object?>>('getCachedAttributionData');
+    return data?.cast<String, dynamic>();
+  }
+
+  @override
+  Future<Map<String, dynamic>?> getPendingDeepLink() async {
+    final data = await methodChannel.invokeMethod<Map<Object?, Object?>>('getPendingDeepLink');
+    return data?.cast<String, dynamic>();
+  }
+
+  @override
+  void clearPendingDeepLink() {
+    methodChannel.invokeMethod('clearPendingDeepLink');
+  }
+
+  @override
+  void trackAppActivate(Map<String, dynamic> arguments) {
+    methodChannel.invokeMethod('trackAppActivate', arguments);
+  }
+
+  @override
+  void trackAppDeactivate() {
+    methodChannel.invokeMethod('trackAppDeactivate');
+  }
+
+  @override
+  void trackPageView(Map<String, dynamic> arguments) {
+    methodChannel.invokeMethod('trackPageView', arguments);
   }
 }

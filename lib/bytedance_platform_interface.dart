@@ -78,4 +78,36 @@ abstract class BytedancePlatform extends PlatformInterface {
   Future<Map<String, dynamic>?> getAttributionData() {
     throw UnimplementedError('getAttributionData() has not been implemented.');
   }
+
+  void uploadActiveRegister(Map<String, dynamic> arguments) {
+    throw UnimplementedError('uploadActiveRegister() has not been implemented.');
+  }
+
+  void requestAttribution() {
+    throw UnimplementedError('requestAttribution() has not been implemented.');
+  }
+
+  Future<Map<String, dynamic>?> getCachedAttributionData() {
+    throw UnimplementedError('getCachedAttributionData() has not been implemented.');
+  }
+
+  Future<Map<String, dynamic>?> getPendingDeepLink() {
+    throw UnimplementedError('getPendingDeepLink() has not been implemented.');
+  }
+
+  void clearPendingDeepLink() {
+    throw UnimplementedError('clearPendingDeepLink() has not been implemented.');
+  }
+
+  void trackAppActivate(Map<String, dynamic> arguments) {
+    throw UnimplementedError('trackAppActivate() has not been implemented.');
+  }
+
+  void trackAppDeactivate() {
+    throw UnimplementedError('trackAppDeactivate() has not been implemented.');
+  }
+
+  void trackPageView(Map<String, dynamic> arguments) {
+    throw UnimplementedError('trackPageView() has not been implemented.');
+  }
 }
