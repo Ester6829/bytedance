@@ -159,9 +159,7 @@ class Bytedance {
   /// [enable] 是否开启调试日志
   /// 开启后会在控制台输出详细的 SDK 日志
   void setDebugMode(bool enable) {
-    BytedancePlatform.instance.setDebugMode({
-      'enable': enable,
-    });
+    BytedancePlatform.instance.setDebugMode({'enable': enable});
   }
 
   // ==========================================
@@ -190,7 +188,6 @@ class Bytedance {
   /// 上报注册事件
   ///
   /// 使用命名参数版本，请使用 [uploadRegisterWithParams] 或 [uploadActiveRegister]
-  @Deprecated('请使用 uploadRegisterWithParams 或 uploadActiveRegister 代替')
   void uploadRegister(Map<String, dynamic> arguments) {
     BytedancePlatform.instance.uploadRegister(arguments);
   }
@@ -313,9 +310,7 @@ class Bytedance {
   /// 应用启动时调用，标记应用激活
   /// [userId] 用户 ID（可选）
   void trackAppActivate({String? userId}) {
-    BytedancePlatform.instance.trackAppActivate({
-      if (userId != null) 'userId': userId,
-    });
+    BytedancePlatform.instance.trackAppActivate({if (userId != null) 'userId': userId});
   }
 
   /// 上报应用退出事件
@@ -374,10 +369,7 @@ class Bytedance {
   ///   },
   /// );
   /// ```
-  void uploadCustomEvent({
-    required String eventName,
-    Map<String, dynamic>? params,
-  }) {
+  void uploadCustomEvent({required String eventName, Map<String, dynamic>? params}) {
     BytedancePlatform.instance.uploadCustomEvent({
       'eventName': eventName,
       if (params != null) 'params': params,
@@ -388,10 +380,7 @@ class Bytedance {
   ///
   /// [eventName] 事件名称
   /// [params] 事件参数
-  void trackEvent({
-    required String eventName,
-    Map<String, dynamic>? params,
-  }) {
+  void trackEvent({required String eventName, Map<String, dynamic>? params}) {
     BytedancePlatform.instance.trackEvent({
       'eventName': eventName,
       if (params != null) 'params': params,
