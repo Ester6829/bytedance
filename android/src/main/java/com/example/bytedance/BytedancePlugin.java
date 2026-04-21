@@ -231,16 +231,7 @@ public class BytedancePlugin implements FlutterPlugin, MethodCallHandler, Activi
       return;
     }
     try {
-      String userId = call.argument("userId");
-      String nickName = call.argument("nickName");
-      String registerType = call.argument("registerType");
-
-      JSONObject customData = new JSONObject();
-      if (userId != null) customData.put("userId", userId);
-      if (nickName != null) customData.put("nickName", nickName);
-      if (registerType != null) customData.put("registerType", registerType);
-
-      ConvertReportHelper.onEventV3("register", customData);
+      ConvertReportHelper.onEventRegister("unknown", true);
       result.success(true);
     } catch (JSONException e) {
       result.error("JSON_ERROR", e.getMessage(), null);
