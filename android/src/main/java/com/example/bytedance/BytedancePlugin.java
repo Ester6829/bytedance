@@ -233,8 +233,6 @@ public class BytedancePlugin implements FlutterPlugin, MethodCallHandler, Activi
     try {
       ConvertReportHelper.onEventRegister("unknown", true);
       result.success(true);
-    } catch (JSONException e) {
-      result.error("JSON_ERROR", e.getMessage(), null);
     } catch (Exception e) {
       result.error("UPLOAD_ERROR", e.getMessage(), null);
     }
